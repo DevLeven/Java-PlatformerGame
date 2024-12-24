@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
+import java.util.Random;
 
 import static org.devlev.utils.GameConstants.UXElements.EnvironmentUX.*;
 
@@ -22,7 +23,7 @@ public class PlayingState extends AbstractGameState  implements IGameState {
     private PlayerEntity playerEntity;
 
     //Get skyBackground image
-    private BufferedImage skyBackgroundImg, bigCloudsImg;
+    private BufferedImage skyBackgroundImg, bigCloudsImg, smallCloudsImg;
 
     //Store level map data
     private int xLvlOffset;
@@ -35,6 +36,9 @@ public class PlayingState extends AbstractGameState  implements IGameState {
     private int maxTitlesOffset = levelMapWidth - Game.TILES_WIDTH;
     //Max length in pixels
     private int maxLevelOffsetX = maxTitlesOffset * Game.TILES_SIZE;
+
+    //Small cloud random pos
+    private int[] smallCloudYPosition;
 
 
     //Load in the game pause menu
@@ -61,8 +65,11 @@ public class PlayingState extends AbstractGameState  implements IGameState {
     {
         //load in sky background image
         this.skyBackgroundImg = GameFile.getSpriteImage(GameFile.PLAYING_BG_IMG);
-        //Load in big cloud image
+        //Load in cloud image
         this.bigCloudsImg = GameFile.getSpriteImage(GameFile.BIG_CLOUDS);
+        this.smallCloudsImg = GameFile.getSpriteImage(GameFile.SMALL_CLOUDS);
+        //Generate small cloud position
+        smallCloudYPosition = generateSmallCloudPosition();
     }
 
     @Override
@@ -105,10 +112,36 @@ public class PlayingState extends AbstractGameState  implements IGameState {
         for (int i = 0; i < 3; i++)
             graphics.drawImage(
                     this.bigCloudsImg,
-                    i * BIG_CLOUD_WIDTH - (int) (xLvlOffset * 0.3),
+                    i * BIG_CLOUD_WIDTH - (int) (xLvlOffset * 0.3) - (int) (xLvlOffset * 0.3),
                     (int) (204 * Game.SCALE),
                     BIG_CLOUD_WIDTH,
                     BIG_CLOUD_HEIGHT, null);
+        //Stream and display clouds accordingly
+        for (int i = 0; i < smallCloudYPosition.length; i++)
+        {
+            graphics.drawImage(
+                    smallCloudsImg,
+                    SMALL_CLOUD_WIDTH * 4 * i - (int) (xLvlOffset * 0.7),
+                    smallCloudYPosition[i],
+                    SMALL_CLOUD_WIDTH,
+                    SMALL_CLOUD_HEIGHT,
+                    null
+            );
+        }
+    }
+
+    private int[] generateSmallCloudPosition()
+    {
+        //Array to store small cloud position
+        int[] smallCloudPosition = new int[8];
+        var rand = new Random();//Generates random y coords
+
+        //Stream array length and generate new pos
+        for (int i = 0; i < smallCloudPosition.length; i++)
+        {
+            smallCloudPosition[i] = (int) (90*Game.SCALE) + rand.nextInt((int)(100 * Game.SCALE));
+        }
+        return smallCloudPosition;//Return created array
     }
 
     private void calculateLevelOffset()
@@ -214,5 +247,6 @@ public class PlayingState extends AbstractGameState  implements IGameState {
     public PlayerEntity getPlayerEntity() {
         return this.playerEntity;
     }
+
 
 }
